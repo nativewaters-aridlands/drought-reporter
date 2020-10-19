@@ -2,7 +2,7 @@ library(magrittr)
 
 states <- 
   tigris::states() %>%
-  dplyr::filter(STUSPS %in% c("AZ","NV"))
+  dplyr::filter(STUSPS %in% c("AZ","NV", "ID", "WA", "OR", "CA", "MT", "WY", "CO", "NM", "TX"))
   
 native_land <- 
   tigris::native_areas() %>%
