@@ -7,7 +7,10 @@ states <-
 native_land <- 
   tigris::native_areas() %>%
   dplyr::filter(as.logical(rowSums(sf::st_intersects(geometry, states, sparse = FALSE)))) %>%
-  sf::st_transform(4326) %T>%
+  sf::st_transform(4326) %>%
+  dplyr::select(NAME) %>%
+  dplyr::group_by(NAME) %>%
+  dplyr::summarise() %T>%
   sf::write_sf("docs/native_land.geojson",
                delete_dsn = TRUE)
 
