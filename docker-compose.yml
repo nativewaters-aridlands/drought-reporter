@@ -1,0 +1,113 @@
+version: '3'
+
+services:
+  ################
+  # postgrest-db #
+  ################
+  postgrest-db:
+    container_name: postgrest-db
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - DB_ANON_ROLE=${DB_ANON_ROLE}
+      - DB_SCHEMA=${DB_SCHEMA}
+    volumes:
+      # anything in initdb directory is created in the database
+      # see "How to extend this image" section at https://hub.docker.com/r/_/postgres/
+      - "./initdb:/docker-entrypoint-initdb.d"
+    restart: always
+
+
+  #############
+  # postgrest #
+  #############
+  postgrest:
+    container_name: postgrest
+    depends_on: 
+      - postgrest-db
+    image: postgrest/postgrest
+    ports:
+      - "5000:3000"
+    environment:
+      # The standard connection URI format, documented at
+      # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
+      - PGRST_DB_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgrest-db:5432/${POSTGRES_DB}
+      # The database schema to expose to REST clients
+      - PGRST_DB_SCHEMA=${DB_SCHEMA}
+      # The database role to use when no client authentication is provided
+      - PGRST_DB_ANON_ROLE=${DB_ANON_ROLE}
+      # Sets the Swagger.host parameter. Must be a valid URI.
+      - PGRST_SERVER_PROXY_URI=${API_HOST}
+#      - PGRST_SERVER_HOST=${API_HOST}
+      - PGRST_SERVER_PORT=5000
+    restart: always
+
+
+  ##############
+  # swagger-ui #
+  ##############
+  swagger-ui:
+    container_name: swagger-ui
+    depends_on:
+      - postgrest
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8080:8080"
+    environment:
+      - URL=${API_HOST}
+    restart: always
+
+
+  ##############
+  # caddy #
+  ##############
+  caddy:
+    container_name: caddy
+    image: caddy:alpine
+    restart: unless-stopped
+    depends_on:
+      - postgrest
+      - swagger-ui
+    links:
+      - postgrest
+      - swagger-ui
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/Caddyfile
+      - ~/caddy:/root/.caddy
+
+#  ##############
+#  # nginx #
+#  ##############
+#  nginx:
+#    container_name: nginx
+#    build: ./nginx
+#    restart: unless-stopped
+#    depends_on:
+#      - postgrest
+#      - swagger-ui
+#    links:
+#      - postgrest
+#      - swagger-ui
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    volumes:
+##      - ./nginx:/etc/nginx
+#      - ./certbot/conf:/etc/letsencrypt
+#      - ./certbot/www:/var/www/certbot
+#    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+#
+#  certbot:
+#    image: certbot/certbot
+#    restart: unless-stopped
+#    volumes:
+#      - ./certbot/conf:/etc/letsencrypt
+#      - ./certbot/www:/var/www/certbot
+#    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
