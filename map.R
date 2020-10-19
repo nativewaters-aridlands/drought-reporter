@@ -1,5 +1,16 @@
 library(magrittr)
 
+states <- 
+  tigris::states() %>%
+  dplyr::filter(STUSPS %in% c("AZ","NV"))
+  
+native_land <- 
+  tigris::native_areas() %>%
+  dplyr::filter(as.logical(rowSums(sf::st_intersects(geometry, states, sparse = FALSE)))) %>%
+  sf::st_transform(4326) %T>%
+  sf::write_sf("docs/native_land.geojson",
+               delete_dsn = TRUE)
+
 leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>% 
   leaflet::fitBounds(-120, 31, -109, 42) %>%
   leaflet::addMapPane("background", 
@@ -47,6 +58,14 @@ leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>%
                                       transparent = TRUE),
     group = "Seasonal Drought Outlook"
   ) %>%
+  leaflet::addPolygons(data = native_land,
+              color = "black", 
+              weight = 1, 
+              smoothFactor = 0.5,
+              opacity = 1.0, 
+              fillOpacity = 0,
+              highlightOptions = leaflet::highlightOptions(color = "white", weight = 2,
+                                                  bringToFront = TRUE)) %>%
   # Layers control
   leaflet::addLayersControl(
     baseGroups = c("Current Drought Conditions",
