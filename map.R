@@ -19,31 +19,31 @@ leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>%
                               leaflet::providerTileOptions(pane = "foreground", 
                                                            attribution = "map data by <a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a>, map style by <a href='https://stamen.com/' target='_blank'>Stamen Design</a>")) %>% 
   leaflet::addScaleBar(position = "bottomright", 
-                       options = leaflet::scaleBarOptions(metric = FALSE)) %>% 
-  # htmlwidgets::onRender("function(el, x) {L.control.zoom({ position: 'topright' }).addTo(this)}") %>% 
-  leaflet.extras::addFullscreenControl(position = "topright") %>% 
+                       options = leaflet::scaleBarOptions(metric = FALSE)) %>%
+  leaflet.extras::addFullscreenControl(position = "topleft") %>% 
   leaflet::addEasyButton(leaflet::easyButton(icon = "fa-crosshairs", 
                                              title = "Locate Me", 
                                              position = "topleft", 
                                              onClick = leaflet::JS("function(btn, map){ map.locate({setView: true}); }"))) %>%
+
   leaflet::addWMSTiles(
     "http://ndmc-001.unl.edu:8080/cgi-bin/mapserv.exe?map=/ms4w/apps/usdm/service/usdm_current_wms.map",
     layers = "usdm_current",
-    options = leaflet::WMSTileOptions(format = "image/png", 
+    options = leaflet::WMSTileOptions(format = "image/png",
                                       transparent = TRUE),
     group = "Current Drought Conditions"
   ) %>%
   leaflet::addWMSTiles(
     "https://idpgis.ncep.noaa.gov/arcgis/services/NWS_Climate_Outlooks/cpc_drought_outlk/MapServer/WMSServer",
     layers = "1",
-    options = leaflet::WMSTileOptions(format = "image/png", 
+    options = leaflet::WMSTileOptions(format = "image/png",
                                       transparent = TRUE),
     group = "Monthly Drought Outlook"
   ) %>%
   leaflet::addWMSTiles(
     "https://idpgis.ncep.noaa.gov/arcgis/services/NWS_Climate_Outlooks/cpc_drought_outlk/MapServer/WMSServer",
     layers = "0",
-    options = leaflet::WMSTileOptions(format = "image/png", 
+    options = leaflet::WMSTileOptions(format = "image/png",
                                       transparent = TRUE),
     group = "Seasonal Drought Outlook"
   ) %>%
@@ -56,7 +56,10 @@ leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>%
     options = leaflet::layersControlOptions(collapsed = TRUE)
   ) %>%
   leafem::addLogo(img = "https://nativewaters-aridlands.github.io/drought-reporter/nwal_symbol.png") %>%
-  leafem::addMouseCoordinates() %>%
- htmlwidgets::saveWidget("map.html")
+  leafem::addMouseCoordinates() %T>%
+ htmlwidgets::saveWidget("map.html",
+                         title = "Drought in the West")
   
-file.copy(from = "map.html", to = "docs/map.html")
+file.copy(from = "map.html", 
+          to = "docs/map.html",
+          overwrite = TRUE)
