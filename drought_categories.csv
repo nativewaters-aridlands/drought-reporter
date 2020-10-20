@@ -1,0 +1,6 @@
+Category,Description,Color
+D0,Abnormally Dry,#FFFF00
+D1,Moderate Drought,#FCD37F
+D2,Severe Drought,#FFAA00
+D3,Extreme Drought,#E60000
+D4,Exceptional Drought,#730000

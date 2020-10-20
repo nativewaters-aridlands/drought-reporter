@@ -2,7 +2,8 @@ library(magrittr)
 
 states <- 
   tigris::states() %>%
-  dplyr::filter(STUSPS %in% c("AZ","NV", "ID", "WA", "OR", "CA", "MT", "WY", "CO", "NM", "TX"))
+  dplyr::filter(!(STUSPS %in% c("AK", "HI", "PR", "VI", "MP", "GU", "AS"))) %>%
+  sf::st_union()
   
 native_land <- 
   tigris::native_areas() %>%
@@ -10,9 +11,13 @@ native_land <-
   sf::st_transform(4326) %>%
   dplyr::select(NAME) %>%
   dplyr::group_by(NAME) %>%
-  dplyr::summarise() %T>%
+  dplyr::summarise() %>%
+  rmapshaper::ms_dissolve(field = "NAME") %T>%
   sf::write_sf("docs/native_land.geojson",
                delete_dsn = TRUE)
+
+usdm <- 
+  sf::read_sf("~/Downloads/2020_USDM_M/USDM_20201013_M/")
 
 leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>% 
   leaflet::fitBounds(-120, 31, -109, 42) %>%
@@ -62,6 +67,7 @@ leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>%
     group = "Seasonal Drought Outlook"
   ) %>%
   leaflet::addPolygons(data = native_land,
+                       label = ~htmltools::htmlEscape(NAME),
               color = "black", 
               weight = 1, 
               smoothFactor = 0.5,
@@ -69,6 +75,15 @@ leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>%
               fillOpacity = 0,
               highlightOptions = leaflet::highlightOptions(color = "white", weight = 2,
                                                   bringToFront = TRUE)) %>%
+  leaflet::addPolygons(data = usdm,
+                       label = ~htmltools::htmlEscape(DM),
+                       color = "black", 
+                       weight = 1, 
+                       smoothFactor = 0.5,
+                       opacity = 1.0, 
+                       fillOpacity = 0,
+                       highlightOptions = leaflet::highlightOptions(color = "white", weight = 2,
+                                                                    bringToFront = TRUE)) %>%
   # Layers control
   leaflet::addLayersControl(
     baseGroups = c("Current Drought Conditions",
@@ -77,11 +92,21 @@ leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>%
     ),
     options = leaflet::layersControlOptions(collapsed = TRUE)
   ) %>%
-  leafem::addLogo(img = "https://nativewaters-aridlands.github.io/drought-reporter/nwal_symbol.png") %>%
+  leafem::addLogo(img = "https://nativewaters-aridlands.github.io/drought-reporter/nwal_symbol_rounded.png") %>%
   leafem::addMouseCoordinates() %T>%
  htmlwidgets::saveWidget("map.html",
-                         title = "Drought in the West")
+                         selfcontained = "FALSE",
+                         libdir = "lib",
+                         title = "Drought Mapper")
   
 file.copy(from = "map.html", 
           to = "docs/map.html",
           overwrite = TRUE)
+
+dir.create("docs/lib",
+           recursive = TRUE,
+           showWarnings = FALSE)
+file.copy(from = "lib", 
+          to = "docs",
+          overwrite = TRUE,
+          recursive = TRUE)
