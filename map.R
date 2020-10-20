@@ -1,4 +1,5 @@
 library(magrittr)
+library(leaflet.extras2)
 
 states <- 
   tigris::states() %>%
@@ -75,15 +76,15 @@ leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>%
               fillOpacity = 0,
               highlightOptions = leaflet::highlightOptions(color = "white", weight = 2,
                                                   bringToFront = TRUE)) %>%
-  leaflet::addPolygons(data = usdm,
-                       label = ~htmltools::htmlEscape(DM),
-                       color = "black", 
-                       weight = 1, 
-                       smoothFactor = 0.5,
-                       opacity = 1.0, 
-                       fillOpacity = 0,
-                       highlightOptions = leaflet::highlightOptions(color = "white", weight = 2,
-                                                                    bringToFront = TRUE)) %>%
+  # leaflet::addPolygons(data = usdm,
+  #                      label = ~htmltools::htmlEscape(DM),
+  #                      color = "black", 
+  #                      weight = 1, 
+  #                      smoothFactor = 0.5,
+  #                      opacity = 1.0, 
+  #                      fillOpacity = 0,
+  #                      highlightOptions = leaflet::highlightOptions(color = "white", weight = 2,
+  #                                                                   bringToFront = TRUE)) %>%
   # Layers control
   leaflet::addLayersControl(
     baseGroups = c("Current Drought Conditions",
@@ -93,7 +94,8 @@ leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>%
     options = leaflet::layersControlOptions(collapsed = TRUE)
   ) %>%
   leafem::addLogo(img = "https://nativewaters-aridlands.github.io/drought-reporter/nwal_symbol_rounded.png") %>%
-  leafem::addMouseCoordinates() %T>%
+  leafem::addMouseCoordinates() %>%
+  addSidebar() %T>%
  htmlwidgets::saveWidget("map.html",
                          selfcontained = "FALSE",
                          libdir = "lib",
