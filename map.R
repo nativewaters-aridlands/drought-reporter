@@ -3,7 +3,9 @@ library(leaflet.extras2)
 
 states <- 
   tigris::states() %>%
-  dplyr::filter(!(STUSPS %in% c("AK", "HI", "PR", "VI", "MP", "GU", "AS"))) %>%
+  dplyr::filter(STUSPS %in% c("AZ","NV")#,
+                #!(STUSPS %in% c("AK", "HI", "PR", "VI", "MP", "GU", "AS"))
+                ) %>%
   sf::st_union()
   
 native_land <- 
