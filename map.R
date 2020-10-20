@@ -18,7 +18,7 @@ native_land <-
                delete_dsn = TRUE)
 
 usdm <- 
-  sf::read_sf("~/Downloads/2020_USDM_M/USDM_20201013_M/")
+  readr::read_csv("drought_categories.csv")
 
 leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>% 
   leaflet::fitBounds(-120, 31, -109, 42) %>%
@@ -50,9 +50,14 @@ leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>%
     "http://ndmc-001.unl.edu:8080/cgi-bin/mapserv.exe?map=/ms4w/apps/usdm/service/usdm_current_wms.map",
     layers = "usdm_current",
     options = leaflet::WMSTileOptions(format = "image/png",
-                                      transparent = TRUE),
+                                      transparent = TRUE,
+                                      opacity = 0.5),
     group = "Current Drought Conditions"
   ) %>%
+  leaflet::addLegend(colors = usdm$Color, 
+            labels = paste0(usdm$Category," (",usdm$Description,")"), 
+            group = "Current Drought Conditions", 
+            position = "bottomleft") %>%
   leaflet::addWMSTiles(
     "https://idpgis.ncep.noaa.gov/arcgis/services/NWS_Climate_Outlooks/cpc_drought_outlk/MapServer/WMSServer",
     layers = "1",
