@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>WMS example - Leaflet</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-select/src/Leaflet.select.css" />
+    <link rel='stylesheet' href="https://cdn.jsdelivr.net/npm/leaflet-fullscreen/dist/leaflet.fullscreen.css" />
+    
+    <!-- Add jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-providers/leaflet-providers.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/geojson/geojson.min.js"></script>
+    <!--    <script src="https://cdn.jsdelivr.net/npm/leaflet-choropleth/dist/choropleth.js"></script>-->
+    <script src="/static/choropleth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fontawesome@4.7.2/generate.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fontawesome/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-select/src/min/Leaflet.select-min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js'></script>
+    <script src="https://stamen-maps.a.ssl.fastly.net/js/tile.stamen.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/spin/dist/spin.min.js" charset="utf-8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-spin/leaflet.spin.min.js" charset="utf-8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-wfst/dist/leaflet-wfst.src.min.js" charset="utf-8"></script>
+    <script src="https://unpkg.com/leaflet-kmz@latest/dist/leaflet-kmz.js"></script>
+
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #map {
+            width: 600px;
+            height: 400px;
+        }
+    </style>
+
+
+</head>
+
+<body>
+
+    <div id='map'></div>
+
+    <script type="text/javascript">
+        var map = L.map('map', {
+            center: [-17, -67],
+            zoom: 3
+        });
+        
+        // Instantiate KMZ layer (async)
+  var kmz = L.kmzLayer().addTo(map);
+
+  kmz.on('load', function(e) {
+    control.addOverlay(e.layer, e.name);
+    // e.layer.addTo(map);
+  });
+
+  // Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
+  kmz.load('usdm_current.kmz');
+
+  var control = L.control.layers(null, null, { collapsed:false }).addTo(map);
+
+    </script>
+
+
+
+</body>
+
+</html>
