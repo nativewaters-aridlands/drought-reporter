@@ -48,13 +48,15 @@
                 fullscreenControl: {
                     pseudoFullscreen: false
                 },
-                attributionControl: true
+                attributionControl: false
             }).fitBounds(
                 [
                     [31, -120],
                     [42, -109]
                 ]
             );
+            
+            L.control.attribution({prefix: 'Map tiles by <a href="http://stamen.com">Stamen Design</a> via <a href="https://www.maptiler.com/copyright/" target="_blank">MapTiler</a> | Data by <a href="http://openstreetmap.org">OpenStreetMap</a>'}).addTo(map)
 
 //            L.control.locate().addTo(map);
 
@@ -141,7 +143,7 @@
 
 
             var labels = L.mapboxGL({
-                attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a> via <a href="https://www.maptiler.com/copyright/" target="_blank">MapTiler</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>.',
+                attribution: '',
                 style: 'https://api.maptiler.com/maps/f0c8face-73e4-41bb-b040-dd493150b9b1/style.json?key=KZO7rAv96Alr8UVUrd4a'
             });
 

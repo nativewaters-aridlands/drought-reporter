@@ -107,6 +107,8 @@ leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = TRUE)) %>%
                          selfcontained = "FALSE",
                          libdir = "lib",
                          title = "Drought Mapper")
+
+leaflet::leafletDependencies
   
 file.copy(from = "map.html", 
           to = "docs/map.html",
