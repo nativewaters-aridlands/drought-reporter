@@ -8,6 +8,7 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="lib/leafletfix-1.0.0/leafletfix.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-select/src/Leaflet.select.css" />
     <link rel='stylesheet' href="https://cdn.jsdelivr.net/npm/leaflet-fullscreen/dist/leaflet.fullscreen.css" />
     <link rel="stylesheet" href="https://cdn.maptiler.com/mapbox-gl-js/v1.5.1/mapbox-gl.css" />
@@ -29,7 +30,6 @@
 
 <body>
     <div id="map"></div>
-
     <script src="https://cdn.jsdelivr.net/npm/leaflet/dist/leaflet.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/mapbox-gl/dist/mapbox-gl.js"></script>
@@ -43,7 +43,8 @@
         promise.then(function(data) {
 
             var map = L.map('map', {
-                maxZoom: 11,
+                maxZoom: 10,
+                minZoom: 5,
                 fullscreenControl: {
                     pseudoFullscreen: false
                 },
@@ -58,14 +59,76 @@
             L.control.locate().addTo(map);
 
 
+            //            var usdm = L.tileLayer.wms(
+            //                "https://gis.ncdc.noaa.gov/arcgis/services/nadm/NADM/MapServer/WmsServer", {
+            //                    layers: '1',
+            //                    format: 'image/png',
+            //                    transparent: true,
+            //                    zIndex: 0,
+            //                    attribution: "<a href='https://droughtmonitor.unl.edu' target='_blank'>US Drought Monitor</a>",
+            //                    opacity: 0.7
+            //                }).addTo(map);
+
             var usdm = L.tileLayer.wms(
                 "http://ndmc-001.unl.edu:8080/cgi-bin/mapserv.exe?map=/ms4w/apps/usdm/service/usdm_current_wms.map", {
                     layers: 'usdm_current',
                     format: 'image/png',
                     transparent: true,
                     zIndex: 0,
-                    attribution: "US Drought Monitor"
+                    attribution: "<a href='https://droughtmonitor.unl.edu' target='_blank'>US Drought Monitor</a>",
+                    opacity: 0.7
                 }).addTo(map);
+
+            var usdm_legend = L.control({
+                position: 'bottomleft'
+            });
+            usdm_legend.onAdd = function(map) {
+                var div = L.DomUtil.create('div', 'info legend leaflet-control');
+                div.innerHTML +=
+                    '<i style="background:#FFFF00;opacity:0.7"></i> D0 (Abnormally Dry)<br>' +
+                    '<i style="background:#FCD37F;opacity:0.7"></i> D1 (Moderate Drought)<br>' +
+                    '<i style="background:#FFAA00;opacity:0.7"></i> D2 (Severe Drought)<br>' +
+                    '<i style="background:#E60000;opacity:0.7"></i> D3 (Extreme Drought)<br>' +
+                    '<i style="background:#730000;opacity:0.7"></i> D4 (Exceptional Drought)<br>'
+
+                return div;
+            };
+
+            usdm_legend.addTo(map);
+
+            var drought_outlook_1month = L.tileLayer.wms(
+                "https://idpgis.ncep.noaa.gov/arcgis/services/NWS_Climate_Outlooks/cpc_drought_outlk/MapServer/WMSServer", {
+                    layers: '1',
+                    format: 'image/png',
+                    transparent: true,
+                    zIndex: 0,
+                    attribution: "<a href='https://www.cpc.ncep.noaa.gov/products/Drought/' target='_blank'>NOAA Climate Prediction Center</a>",
+                    opacity: 0.7
+                });
+
+            var drought_outlook_3month = L.tileLayer.wms(
+                "https://idpgis.ncep.noaa.gov/arcgis/services/NWS_Climate_Outlooks/cpc_drought_outlk/MapServer/WMSServer", {
+                    layers: '0',
+                    format: 'image/png',
+                    transparent: true,
+                    zIndex: 0,
+                    attribution: "<a href='https://www.cpc.ncep.noaa.gov/products/Drought/' target='_blank'>NOAA Climate Prediction Center</a>",
+                    opacity: 0.7
+                });
+
+            var drought_outlook_legend = L.control({
+                position: 'bottomleft'
+            });
+            drought_outlook_legend.onAdd = function(map) {
+                var div = L.DomUtil.create('div', 'info legend leaflet-control');
+                div.innerHTML +=
+                    '<i style="background:#884F39;opacity:0.7"></i> Drought persists<br>' +
+                    '<i style="background:#D3C6AB;opacity:0.7"></i> Drought remains but improves<br>' +
+                    '<i style="background:#A39F56;opacity:0.7"></i> Drought removal likely<br>' +
+                    '<i style="background:#FED951;opacity:0.7"></i> Drought development likely<br>'
+
+                return div;
+            };
 
             var hillshade = L.tileLayer(
                 'https://api.maptiler.com/tiles/hillshades/{z}/{x}/{y}.png?key=KZO7rAv96Alr8UVUrd4a', {
@@ -78,13 +141,21 @@
 
 
             var labels = L.mapboxGL({
-                attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
+                attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a> via <a href="https://www.maptiler.com/copyright/" target="_blank">MapTiler</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>.',
                 style: 'https://api.maptiler.com/maps/f0c8face-73e4-41bb-b040-dd493150b9b1/style.json?key=KZO7rAv96Alr8UVUrd4a'
             });
 
 
             L.layerGroup([hillshade, labels])
                 .addTo(map);
+
+            var baseMaps = {
+                "US Drought Monitor": usdm,
+                "1-Month Drought Outlook": drought_outlook_1month,
+                "3-Month Drought Outlook": drought_outlook_3month
+            };
+
+            L.control.layers(baseMaps).addTo(map);
 
             function highlightFeature(e) {
                 var layer = e.target;
@@ -137,6 +208,20 @@
                 layer.bindTooltip(layer.feature.properties.NAME, {
                     sticky: true
                 });
+            });
+
+            // Add and remove layers
+            map.on('baselayerchange', function(eventLayer) {
+                if (eventLayer.name === 'US Drought Monitor') {
+                    this.removeControl(drought_outlook_legend);
+                    usdm_legend.addTo(this);
+                } else { // Or switch to the treeline legend...
+                    this.removeControl(usdm_legend);
+                    drought_outlook_legend.addTo(this);
+                }
+//                //                hillshade.bringToFront();
+//                labels.remove();
+//                labels.addTo(map);
             });
         });
 
